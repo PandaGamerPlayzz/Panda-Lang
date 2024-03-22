@@ -9,7 +9,7 @@ from generator import Generator
 def main() -> None:
     arg_parser = argparse.ArgumentParser(description='A compiler for the Panda programming language')
 
-    arg_parser.add_argument('-a', action='store_true', help='Generate all files (.asm, .o, .obj, etc.)')
+    arg_parser.add_argument('-a', action='store_true', help='Generate all files along with the executable (.asm, .o, .obj, etc.)')
     arg_parser.add_argument('-r', action='store_true', help='Run the code after compiling')
     arg_parser.add_argument('-t', action='store_true', help='Only run the tokenizer step')
     arg_parser.add_argument('file_path', type=str, help='The path to the file you would like to compile')
