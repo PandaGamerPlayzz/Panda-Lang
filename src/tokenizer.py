@@ -126,7 +126,7 @@ class Tokenizer:
                 continue
             elif raw_source[i] == '.' and is_float == True: 
                 lineInfo = self.find_line_info(raw_source, i)
-                UnrecognizedTokenError(message=f'Unrecognized token "{raw_source[i]}" encountered at {lineInfo[0]}:{lineInfo[1]}').raiseErr()
+                UnrecognizedTokenError(message=f'Unrecognized token "{raw_source[i]}" encountered at {lineInfo[0]}:{lineInfo[1]}').raise_err()
             elif raw_source[i] == '.': 
                 is_float = True
             num_str += raw_source[i]
