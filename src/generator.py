@@ -6,7 +6,7 @@ import tempfile
 
 from parse import AST_NODE_TYPE
 
-ALWAYS_DEFAULT_EXIT_WITH_0 = False
+ALWAYS_DEFAULT_EXIT_WITH_0 = True
 
 class Program:
     def __init__(self, assembly_source: str) -> None:
@@ -68,26 +68,53 @@ class Program:
             print("Executable does not exist. Please compile the program first.")
 
 class Generator:
-    @staticmethod
-    def generate_assembly_elf64(ast_nodes):
-        with io.StringIO() as stream:
-            stream.write("section .text\n")
-            stream.write("    global _start\n\n")
-            stream.write("_start:\n")
+    def __init__(self):
+        self.indent_level = 0
+        self.stream = io.StringIO()
 
-            exit_processed = False
+    def increase_indent(self):
+        self.indent_level += 4
 
-            for node in ast_nodes:
-                if node.type == AST_NODE_TYPE.EXIT:
-                    stream.write("    mov rax, 60 ; syscall number for exit\n")
-                    stream.write(f"    mov rdi, {node.value} ; exit code\n")
-                    stream.write("    syscall ; perform the system call\n\n")
-                    exit_processed = True
-            
-            if not exit_processed or ALWAYS_DEFAULT_EXIT_WITH_0:
-                stream.write("    ; default to exiting with 0\n")
-                stream.write("    mov rax, 60 ; syscall number for exit\n")
-                stream.write("    mov rdi, 0 ; exit code\n")
-                stream.write("    syscall ; perform the system call\n\n")
+    def decrease_indent(self):
+        self.indent_level = max(0, self.indent_level - 4)
 
-            return Program(stream.getvalue())
+    def write(self, text):
+        indented_text = ' ' * self.indent_level + text + '\n'
+        self.stream.write(indented_text)
+
+    def close(self):
+        self.stream.close()
+
+    def get_value(self):
+        return self.stream.getvalue()
+
+    def generate_assembly_elf64(self, ast_nodes):
+        self.write("section .text")
+        self.write("global _start")
+        self.write("")
+        self.write("_start:")
+
+        self.increase_indent()
+
+        exit_processed = False
+
+        for node in ast_nodes:
+            if node.type == AST_NODE_TYPE.EXIT:
+                self.write("mov rax, 60 ; syscall code for exit")
+                self.write(f"mov rdi, {node.value} ; exit code")
+                self.write("syscall")
+                self.write("")
+                exit_processed = True
+
+        if not exit_processed or ALWAYS_DEFAULT_EXIT_WITH_0:
+            self.write("; default to exiting with 0")
+            self.write("mov rax, 60 ; syscall code for exit")
+            self.write("mov rdi, 0 ; exit code")
+            self.write("syscall")
+            self.write("")
+
+        self.decrease_indent()
+        program = Program(self.get_value())
+        self.close()
+
+        return program

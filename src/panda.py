@@ -30,7 +30,8 @@ def main() -> None:
     program_parser = Parser(program_tokens)
     program_ast = program_parser.parse()
 
-    program = Generator.generate_assembly_elf64(program_ast)
+    program_generator = Generator()
+    program = program_generator.generate_assembly_elf64(program_ast)
 
     output_path = os.path.join(args.file_path, '../', os.path.splitext(os.path.basename(args.file_path))[0])
     program.compile(output_path, full_output=args.a)
