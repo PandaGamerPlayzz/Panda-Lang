@@ -61,7 +61,7 @@ class Tokenizer:
     def __init__(self) -> None:
         self.tokens = Tokens()
         self.single_character_handlers = {
-            '(': self.handle_open_parentheses,
+            '(': self.gen_handler(TOKEN_TYPE.OPEN_PARENTHESES),
             ')': self.handle_close_parentheses,
             '{': self.handle_open_curly_bracket,
             '}': self.handle_close_curly_bracket,
@@ -109,6 +109,13 @@ class Tokenizer:
 
         return self.tokens
     
+    def gen_handler(self, token_type: TOKEN_TYPE, word_length: int = 1):
+        def handler(raw_source, i):
+            self.tokens.add_token(Token(token_type))
+            return i + word_length
+
+        return handler
+
     def handle_open_parentheses(self, raw_source, i):
         self.tokens.add_token(Token(TOKEN_TYPE.OPEN_PARENTHESES))
         return i + 1

@@ -19,7 +19,7 @@ class PandaCompilerError(Exception):
             raise self
 
 #
-# Tokenization Errors
+#   Tokenization Errors
 #
 
 class TokenizationError(PandaCompilerError):
@@ -28,7 +28,19 @@ class TokenizationError(PandaCompilerError):
 
 class UnrecognizedTokenError(TokenizationError):
     """Exception raised when an unrecognized token is encountered."""
-    def __init__(self, token=None, message="Unrecognized token encountered"):
-        self.token = token
+    def __init__(self, message="Unrecognized token encountered"):
+        self.message = message
+        super().__init__(self.message)
+
+#
+#   Parsing Errors
+#
+
+class ParsingError(PandaCompilerError):
+    """Base class for tokenization exceptions"""
+    pass
+
+class UnexpectedTokenError(ParsingError):
+    def __init__(self, message="Unexpected token encountered"):
         self.message = message
         super().__init__(self.message)

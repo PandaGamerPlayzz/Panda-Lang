@@ -1,5 +1,6 @@
 from enum import Enum, auto
 
+from exceptions import UnexpectedTokenError
 from tokenizer import TOKEN_TYPE, Token, Tokens
 
 class AST_NODE_TYPE(Enum):
@@ -26,7 +27,7 @@ class Parser:
         if self.current_token().type == expected_type:
             self.current += 1
         else:
-            raise Exception(f"Expected {expected_type}, but got {self.current_token().type}")
+            UnexpectedTokenError(f"Expected {expected_type}, but got {self.current_token().type}").raise_err()
 
     def parse(self):
         nodes = []
