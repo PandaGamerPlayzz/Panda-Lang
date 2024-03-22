@@ -62,15 +62,15 @@ class Tokenizer:
         self.tokens = Tokens()
         self.single_character_handlers = {
             '(': self.gen_handler(TOKEN_TYPE.OPEN_PARENTHESES),
-            ')': self.handle_close_parentheses,
-            '{': self.handle_open_curly_bracket,
-            '}': self.handle_close_curly_bracket,
-            '[': self.handle_open_bracket,
-            ']': self.handle_close_bracket,
-            ';': self.handle_semicolon,
+            ')': self.gen_handler(TOKEN_TYPE.CLOSE_PARENTHESES),
+            '{': self.gen_handler(TOKEN_TYPE.OPEN_CURLY_BRACKET),
+            '}': self.gen_handler(TOKEN_TYPE.CLOSE_CURLY_BRACKET),
+            '[': self.gen_handler(TOKEN_TYPE.OPEN_BRACKET),
+            ']': self.gen_handler(TOKEN_TYPE.CLOSE_BRACKET),
+            ';': self.gen_handler(TOKEN_TYPE.SEMICOLON),
         }
         self.multi_character_handlers = {
-            'exit': self.handle_exit,
+            'exit': self.gen_handler(TOKEN_TYPE.EXIT, word_length=4),
         }
 
     def peek_characters(self, raw_source, current_index, number_of_characters):
