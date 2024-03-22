@@ -45,7 +45,7 @@ class UnexpectedTokenError(ParsingError):
         self.message = message
         super().__init__(self.message)
 
-class SyntaxError(ParsingError):
-    def __init__(self, message="Unexpected token encountered"):
+class UnrecognizedASTNode(ParsingError):
+    def __init__(self, message="Urecognized AST Node encountered"):
         self.message = message
         super().__init__(self.message)

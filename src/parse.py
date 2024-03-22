@@ -1,6 +1,6 @@
 from enum import Enum, auto
 
-from exceptions import UnexpectedTokenError
+from exceptions import UnexpectedTokenError, UnrecognizedASTNode
 from tokenizer import TOKEN_TYPE, Token, Tokens
 
 class AST_NODE_TYPE(Enum):
@@ -34,7 +34,7 @@ class Parser:
             if self.current_token().type == TOKEN_TYPE.EXIT:
                 nodes.append(self.parse_exit())
             else:
-                SyntaxError("Syntax Error").raise_err()
+                UnrecognizedASTNode("Syntax Error").raise_err()
             
         return nodes
 
