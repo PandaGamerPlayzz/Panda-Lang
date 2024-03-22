@@ -115,34 +115,6 @@ class Tokenizer:
             return i + word_length
 
         return handler
-
-    def handle_open_parentheses(self, raw_source, i):
-        self.tokens.add_token(Token(TOKEN_TYPE.OPEN_PARENTHESES))
-        return i + 1
-
-    def handle_close_parentheses(self, raw_source, i):
-        self.tokens.add_token(Token(TOKEN_TYPE.CLOSE_PARENTHESES))
-        return i + 1
-
-    def handle_open_curly_bracket(self, raw_source, i):
-        self.tokens.add_token(Token(TOKEN_TYPE.OPEN_CURLY_BRACKET))
-        return i + 1
-
-    def handle_close_curly_bracket(self, raw_source, i):
-        self.tokens.add_token(Token(TOKEN_TYPE.CLOSE_CURLY_BRACKET))
-        return i + 1
-
-    def handle_open_bracket(self, raw_source, i):
-        self.tokens.add_token(Token(TOKEN_TYPE.OPEN_BRACKET))
-        return i + 1
-
-    def handle_close_bracket(self, raw_source, i):
-        self.tokens.add_token(Token(TOKEN_TYPE.CLOSE_BRACKET))
-        return i + 1
-
-    def handle_semicolon(self, raw_source, i):
-        self.tokens.add_token(Token(TOKEN_TYPE.SEMICOLON))
-        return i + 1
     
     def handle_number(self, raw_source, i):
         num_str = raw_source[i]
@@ -161,10 +133,6 @@ class Tokenizer:
 
         self.tokens.add_token(Token(is_float and TOKEN_TYPE.FLOAT or TOKEN_TYPE.INTEGER, (is_float and float or int)(num_str)))
         return i + 1
-    
-    def handle_exit(self, raw_source, i):
-        self.tokens.add_token(Token(TOKEN_TYPE.EXIT))
-        return i + 4
 
     def handle_unrecognized(self, raw_source, i):
         line_info = self.find_line_info(raw_source, i)
