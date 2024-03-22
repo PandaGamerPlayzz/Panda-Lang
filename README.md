@@ -1,7 +1,7 @@
 # The Panda-Lang Compiler
 Written by Zachary A. Miller
 
-## Setup
+## Setup and Usage
 The Panda Compiler is written in python. It first transpiles to assembly, then uses NASM and runs the linker to provide you with an executable.
 
 Requirements:
