@@ -34,7 +34,7 @@ class Parser:
             if self.current_token().type == TOKEN_TYPE.EXIT:
                 nodes.append(self.parse_exit())
             else:
-                raise Exception("Syntax Error")
+                SyntaxError("Syntax Error").raise_err()
             
         return nodes
 

@@ -44,3 +44,8 @@ class UnexpectedTokenError(ParsingError):
     def __init__(self, message="Unexpected token encountered"):
         self.message = message
         super().__init__(self.message)
+
+class SyntaxError(ParsingError):
+    def __init__(self, message="Unexpected token encountered"):
+        self.message = message
+        super().__init__(self.message)
