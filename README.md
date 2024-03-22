@@ -9,11 +9,11 @@ Requirements:
 
 Usage: panda.py [-h] [-a] [-r] [-t] file_path
 
-Positional arguments
-  file_path   The path to the file you would like to compile
+Positional arguments:\
+&ensp;&ensp;file_path   The path to the file you would like to compile
 
-Options
-  -h, --help  show the help message and exit
-  -a          Generate all files along with the executable (.asm, .o, .obj, etc.)
-  -r          Run the code after compiling
-  -t          Only run the tokenizer step
+Options:\
+&ensp;&ensp;-h, --help  show the help message and exit\
+&ensp;&ensp;-a          Generate all files along with the executable (.asm, .o, .obj, etc.)\
+&ensp;&ensp;-r          Run the code after compiling\
+&ensp;&ensp;-t          Only run the tokenizer step
