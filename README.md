@@ -9,10 +9,10 @@ Requirements:
 
 Usage: panda.py [-h] [-a] [-r] [-t] file_path
 
-Positional arguments:
+Positional arguments:\n
   file_path   The path to the file you would like to compile
 
-Options:
+Options:\n
   -h, --help  show the help message and exit
   -a          Generate all files along with the executable (.asm, .o, .obj, etc.)
   -r          Run the code after compiling
