@@ -5,7 +5,6 @@ from tokenizer import TOKEN_TYPE, Token, Tokens
 
 class AST_NODE_TYPE(Enum):
     EXIT = auto()
-    NO_OP = auto()
 
 class ASTNode:
     def __init__(self, type_, value=None):
@@ -36,8 +35,7 @@ class Parser:
                 nodes.append(self.parse_exit())
             else:
                 raise Exception("Syntax Error")
-        if not nodes:
-            nodes.append(ASTNode(AST_NODE_TYPE.NO_OP))
+            
         return nodes
 
     def parse_exit(self):
