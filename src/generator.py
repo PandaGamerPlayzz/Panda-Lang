@@ -36,6 +36,8 @@ class Program:
         output_folder_path = os.path.normpath(os.path.join(dir_name, 'output/'))
         lib_path = os.path.normpath(os.path.join(output_folder_path, 'lib/'))
 
+        object_filenames = []
+
         if USE_ABSOLUTE_INCLUDE_PATH == True:
             self.assembly_source = self.assembly_source.replace("#{LIB_DIRECTORY}", os.path.abspath(lib_path) + "/")
         else:
@@ -53,6 +55,9 @@ class Program:
             asm_filename = os.path.join(output_folder_path, f"{base_name}.asm") if full_output else tempfile.mktemp(suffix='.asm', dir=dir_name)
             obj_filename = os.path.join(output_folder_path, f"{base_name}.o") if full_output else tempfile.mktemp(suffix='.o', dir=dir_name)
 
+            object_filenames.append(obj_filename)
+            print(object_filenames)
+
             try:
                 # Write assembly source to file
                 with open(asm_filename, 'w') as asm_file:
@@ -61,7 +66,7 @@ class Program:
                 # Assemble with NASM
                 subprocess.run(["nasm", "-f", "elf64", "-o", obj_filename, asm_filename], check=True, stderr=subprocess.PIPE)
 
-                self.link(output_path, full_output=full_output)
+                self.link(output_path, object_filenames, full_output=full_output)
 
             except subprocess.CalledProcessError as e:
                 print(f"Error during {'assembly' if 'nasm' in e.cmd else 'linking'}:")
@@ -96,7 +101,7 @@ class Program:
             finally:
                 if not full_output and os.path.exists(asm_filename): os.remove(asm_filename)
 
-    def link(self, output_path, object_filenames=None, full_output=False):
+    def link(self, output_path, object_filenames, full_output=False):
         base_name = os.path.splitext(os.path.basename(output_path))[0]
         # Ensure dir_name is only the directory part of output_path
         dir_name = os.path.dirname(output_path) if os.path.dirname(output_path) else '.'
@@ -106,8 +111,6 @@ class Program:
 
         output_folder_path = os.path.normpath(os.path.join(dir_name, 'output/'))
         lib_path = os.path.normpath(os.path.join(output_folder_path, 'lib/'))
-
-        if object_filenames == None: object_filenames = [os.path.join(output_folder_path, f"{base_name}.o") if full_output else tempfile.mktemp(suffix='.o', dir=dir_name)]
 
         # TODO add builtins-elf64.0 to link with ld
         # Link with ld
