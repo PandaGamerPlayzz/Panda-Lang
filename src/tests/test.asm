@@ -1,13 +1,18 @@
+; Transpiled using Panda-Lang v1.0.0
+; Linux x86_64: elf64
+
+section .data
+    _cs0 db "Hello, World!",10,0
+
 section .text
-global _start
+    global _start
+
+%include "/mnt/c/Users/Zach/Documents/.dev/Github/Panda-Lang/src/lib/builtins-elf64.asm"
 
 _start:
-    mov rax, 60 ; syscall code for exit
-    mov rdi, 69 ; exit code
-    syscall
+    print _cs0
     
-    ; default to exiting with 0
-    mov rax, 60 ; syscall code for exit
-    mov rdi, 0 ; exit code
-    syscall
+    exit 69
+    
+    exit 0 ; default to exiting with 0
     

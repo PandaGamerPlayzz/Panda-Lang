@@ -7,6 +7,8 @@ class TOKEN_TYPE(Enum):
     # Data Types
     INTEGER = auto() # Example: 123
     FLOAT = auto() # Example: 1.23
+    STRING = auto() # Example: '123'
+    CONST_STRING = auto() # Example: '123'; get's put into 'section .data' in the assembly
 
     # Symbols
     OPEN_PARENTHESES = auto() # (
@@ -29,6 +31,7 @@ class TOKEN_TYPE(Enum):
 
     # Built ins
     EXIT = auto()
+    PRINT = auto()
 
     # Other
     END_OF_FILE = auto()
@@ -71,6 +74,7 @@ class Tokenizer:
         }
         self.multi_character_handlers = {
             'exit': self.gen_handler(TOKEN_TYPE.EXIT, word_length=4),
+            'print': self.gen_handler(TOKEN_TYPE.PRINT, word_length=5),
         }
 
     def peek_characters(self, raw_source, current_index, number_of_characters):
@@ -94,6 +98,8 @@ class Tokenizer:
                 char = raw_source[i]
                 if char in self.single_character_handlers:
                     i = self.single_character_handlers[char](raw_source, i)
+                elif char in ["\"", "\'", "`"]:
+                    i = self.handle_string(raw_source, i)
                 elif char.isdigit():
                     i = self.handle_number(raw_source, i)
                 elif char.isspace():
@@ -116,10 +122,24 @@ class Tokenizer:
 
         return handler
     
+    def handle_string(self, raw_source, i):
+        string = ""
+        start_character = raw_source[i]
+
+        while i + 1 < len(raw_source):
+            if raw_source[i + 1] == start_character and raw_source[i] != "\\": break
+
+            i += 1
+            string = string.rstrip("\\")
+            string += raw_source[i]
+
+        self.tokens.add_token(Token(TOKEN_TYPE.CONST_STRING, string))
+        return i + 2
+
     def handle_number(self, raw_source, i):
         num_str = raw_source[i]
         is_float = False
-        while i + 1 < len(raw_source) and (raw_source[i + 1].isdigit() or raw_source[i + 1] == '.' or raw_source[i + 1] == '_'):
+        while i + 1 < len(raw_source) and (raw_source[i + 1].isdigit() or raw_source[i + 1] in ['.', '_']):
             i += 1
 
             if raw_source[i] == '_': 
