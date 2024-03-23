@@ -20,6 +20,7 @@ class Program:
         self.executable_path = None
         self.program_name = program_name
         self.child_programs = []
+        self.object_filenames = []
 
     def add_child(self, child_program):
         self.child_programs.append(child_program)
@@ -34,8 +35,6 @@ class Program:
 
         output_folder_path = os.path.normpath(os.path.join(dir_name, 'output/'))
         lib_path = os.path.normpath(os.path.join(output_folder_path, 'lib/'))
-
-        object_filenames = []
 
         if USE_ABSOLUTE_INCLUDE_PATH == True:
             self.assembly_source = self.assembly_source.replace("#{LIB_DIRECTORY}", os.path.abspath(lib_path) + "/")
@@ -54,8 +53,7 @@ class Program:
             asm_filename = os.path.join(output_folder_path, f"{base_name}.asm")
             obj_filename = os.path.join(output_folder_path, f"{base_name}.o")
 
-            object_filenames.append(obj_filename)
-            print(object_filenames)
+            self.object_filenames.append(obj_filename)
 
             try:
                 # Write assembly source to file
@@ -65,7 +63,7 @@ class Program:
                 # Assemble with NASM
                 subprocess.run(["nasm", "-f", "elf64", "-o", obj_filename, asm_filename], check=True, stderr=subprocess.PIPE)
 
-                self.link(output_path, object_filenames, full_output=full_output)
+                self.link(output_path, self.object_filenames, full_output=full_output)
             except subprocess.CalledProcessError as e:
                 print(f"Error during {'assembly' if 'nasm' in e.cmd else 'linking'}:")
                 print(e.stderr.decode())
@@ -81,13 +79,15 @@ class Program:
                 if not os.listdir(lib_path): os.rmdir(lib_path)
                 if not os.listdir(output_folder_path) or full_output == False: shutil.rmtree(output_folder_path) # os.rmdir(output_folder_path)
 
-                for object_filename in object_filenames:
+                for object_filename in self.object_filenames:
                     path = os.path.join(dir_name, object_filename)
                     if os.path.exists(path): os.remove(path)
         else:
             # Generate the filenames for assembly and object files
             asm_filename = os.path.join(lib_path, f"{self.program_name}.asm")
             obj_filename = os.path.join(lib_path, f"{self.program_name}.o")
+
+            self.object_filenames.append(obj_filename)
 
             try:
                 with open(asm_filename, 'w') as asm_file:
@@ -101,20 +101,15 @@ class Program:
                 raise
 
     def link(self, output_path, object_filenames, full_output=False):
-        base_name = os.path.splitext(os.path.basename(output_path))[0]
         # Ensure dir_name is only the directory part of output_path
         dir_name = os.path.dirname(output_path) if os.path.dirname(output_path) else '.'
 
         # Correct handling for relative paths like './tests/test.pnda/..'
         dir_name = os.path.normpath(dir_name)  # Normalize the path to resolve '..'
 
-        output_folder_path = os.path.normpath(os.path.join(dir_name, 'output/'))
-        lib_path = os.path.normpath(os.path.join(output_folder_path, 'lib/'))
-
-        # TODO add builtins-elf64.0 to link with ld
         # Link with ld
         self.executable_path = os.path.abspath(output_path)
-        subprocess.run(["ld", "-o", self.executable_path, object_filenames[0]], check=True, stderr=subprocess.PIPE)
+        subprocess.run(["ld", "-o", self.executable_path] + object_filenames, check=True, stderr=subprocess.PIPE)
 
     def run(self):
         """
@@ -220,7 +215,6 @@ class GeneratorNASM(StringStream):
         # Open and input methods from "src/lib/builtins-elf64.asm"
         builtins = None
         builtins_asm = StringStream()
-        print(os.path.normpath(os.path.join(__file__, "../lib/builtins-elf64.asm")))
         with open(os.path.normpath(os.path.join(__file__, "../lib/builtins-elf64.asm")), "r") as elf64_builtins:
             skipping = False
             for line in elf64_builtins:
