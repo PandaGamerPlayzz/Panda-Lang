@@ -61,9 +61,7 @@ class Program:
                 # Assemble with NASM
                 subprocess.run(["nasm", "-f", "elf64", "-o", obj_filename, asm_filename], check=True, stderr=subprocess.PIPE)
 
-                # Link with ld
-                self.executable_path = os.path.abspath(output_path)
-                subprocess.run(["ld", "-o", self.executable_path, obj_filename], check=True, stderr=subprocess.PIPE)
+                self.link(output_path, full_output=full_output)
 
             except subprocess.CalledProcessError as e:
                 print(f"Error during {'assembly' if 'nasm' in e.cmd else 'linking'}:")
@@ -80,20 +78,41 @@ class Program:
 
                 if not os.listdir(lib_path): os.rmdir(lib_path)
                 if not os.listdir(output_folder_path): os.rmdir(output_folder_path)
-                
         else:
             # Generate the filenames for assembly and object files
             asm_filename = os.path.join(lib_path, f"{self.program_name}.asm") if full_output else tempfile.mktemp(suffix='.asm', dir=dir_name)
+            obj_filename = os.path.join(lib_path, f"{self.program_name}.o") if full_output else tempfile.mktemp(suffix='.o', dir=dir_name)
 
             try:
                 with open(asm_filename, 'w') as asm_file:
                     asm_file.write(self.assembly_source)
+
+                # Assemble with NASM
+                subprocess.run(["nasm", "-f", "elf64", "-o", obj_filename, asm_filename], check=True, stderr=subprocess.PIPE)
             except subprocess.CalledProcessError as e:
                 print(f"Error during generation:")
                 print(e.stderr.decode())
                 raise
             finally:
                 if not full_output and os.path.exists(asm_filename): os.remove(asm_filename)
+
+    def link(self, output_path, object_filenames=None, full_output=False):
+        base_name = os.path.splitext(os.path.basename(output_path))[0]
+        # Ensure dir_name is only the directory part of output_path
+        dir_name = os.path.dirname(output_path) if os.path.dirname(output_path) else '.'
+
+        # Correct handling for relative paths like './tests/test.pnda/..'
+        dir_name = os.path.normpath(dir_name)  # Normalize the path to resolve '..'
+
+        output_folder_path = os.path.normpath(os.path.join(dir_name, 'output/'))
+        lib_path = os.path.normpath(os.path.join(output_folder_path, 'lib/'))
+
+        if object_filenames == None: object_filenames = [os.path.join(output_folder_path, f"{base_name}.o") if full_output else tempfile.mktemp(suffix='.o', dir=dir_name)]
+
+        # TODO add builtins-elf64.0 to link with ld
+        # Link with ld
+        self.executable_path = os.path.abspath(output_path)
+        subprocess.run(["ld", "-o", self.executable_path, object_filenames[0]], check=True, stderr=subprocess.PIPE)
 
     def run(self):
         """
