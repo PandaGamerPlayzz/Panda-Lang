@@ -2,10 +2,10 @@
 ; Linux x86_64: elf64
 ;; coments defined with two semicolons will not appear in the generated program and can only be seen in this file
 
-; section .bss 
-;     digitSpace resb 100
-;     digitSpacePos resb 8
-
+;; section .bss 
+;;     digitSpace resb 100
+;;     digitSpacePos resb 8
+;;
 ; input: integer defining exit code
 %macro exit 1
     mov rax, SYS_EXIT

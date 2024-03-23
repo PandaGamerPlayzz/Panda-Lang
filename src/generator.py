@@ -2,7 +2,7 @@ import io
 import os
 import sys
 import subprocess
-import tempfile
+import shutil
 from enum import Enum, auto
 
 from parse import AST_NODE_TYPE
@@ -10,7 +10,6 @@ from version import VERSION
 
 ALWAYS_DEFAULT_EXIT_WITH_0 = True
 USE_ABSOLUTE_INCLUDE_PATH = True
-REBUILD_LIB = True
 
 class ASSEMBLER(Enum):
     NASM = auto()
@@ -52,8 +51,8 @@ class Program:
 
         if self.program_name == None:
             # Generate the filenames for assembly and object files
-            asm_filename = os.path.join(output_folder_path, f"{base_name}.asm") if full_output else tempfile.mktemp(suffix='.asm', dir=dir_name)
-            obj_filename = os.path.join(output_folder_path, f"{base_name}.o") if full_output else tempfile.mktemp(suffix='.o', dir=dir_name)
+            asm_filename = os.path.join(output_folder_path, f"{base_name}.asm")
+            obj_filename = os.path.join(output_folder_path, f"{base_name}.o")
 
             object_filenames.append(obj_filename)
             print(object_filenames)
@@ -82,11 +81,15 @@ class Program:
                         os.remove(obj_filename)
 
                 if not os.listdir(lib_path): os.rmdir(lib_path)
-                if not os.listdir(output_folder_path): os.rmdir(output_folder_path)
+                if not os.listdir(output_folder_path) or full_output == False: shutil.rmtree(output_folder_path) # os.rmdir(output_folder_path)
+
+                for object_filename in object_filenames:
+                    path = os.path.join(dir_name, object_filename)
+                    if os.path.exists(path): os.remove(path)
         else:
             # Generate the filenames for assembly and object files
-            asm_filename = os.path.join(lib_path, f"{self.program_name}.asm") if full_output else tempfile.mktemp(suffix='.asm', dir=dir_name)
-            obj_filename = os.path.join(lib_path, f"{self.program_name}.o") if full_output else tempfile.mktemp(suffix='.o', dir=dir_name)
+            asm_filename = os.path.join(lib_path, f"{self.program_name}.asm")
+            obj_filename = os.path.join(lib_path, f"{self.program_name}.o")
 
             try:
                 with open(asm_filename, 'w') as asm_file:
@@ -98,8 +101,6 @@ class Program:
                 print(f"Error during generation:")
                 print(e.stderr.decode())
                 raise
-            finally:
-                if not full_output and os.path.exists(asm_filename): os.remove(asm_filename)
 
     def link(self, output_path, object_filenames, full_output=False):
         base_name = os.path.splitext(os.path.basename(output_path))[0]
@@ -220,28 +221,25 @@ class GeneratorNASM(StringStream):
 
         # Open and input methods from "src/lib/builtins-elf64.asm"
         builtins = None
-        if REBUILD_LIB == True:
-            builtins_asm = StringStream()
-            with open(os.path.join(os.path.split(__file__)[0], "lib/builtins-elf64.asm"), "r") as elf64_builtins:
-                skipping = False
-                for line in elf64_builtins:
-                    if line.strip() == ";; begin .bss":
-                        skipping = True
-                    elif line.strip() == ";; end .bss":
-                        skipping = False
+        builtins_asm = StringStream()
+        print(os.path.normpath(os.path.join(__file__, "../lib/builtins-elf64.asm")))
+        with open(os.path.normpath(os.path.join(__file__, "../lib/builtins-elf64.asm")), "r") as elf64_builtins:
+            skipping = False
+            for line in elf64_builtins:
+                if line.strip() == ";; begin .bss":
+                    skipping = True
+                elif line.strip() == ";; end .bss":
+                    skipping = False
 
-                    if skipping == True: continue
+                if skipping == True: continue
 
-                    if not line.startswith(";;"):
-                        builtins_asm.write(line.rstrip('\n'))
-                builtins_asm.write("")
-            
-            builtins = Program(builtins_asm.get_value(), "builtins-elf64")
-            builtins_asm.close()
-            self.write(f"%include \"{'#{LIB_DIRECTORY}builtins-elf64.asm'}\"\n")
-        else:
-            lib_builtins_path = os.path.abspath(os.path.join(__file__, "../lib/builtins-elf64.asm"))
-            self.write(f"%include \"{lib_builtins_path}\"\n")
+                if not line.startswith(";;"):
+                    builtins_asm.write(line.rstrip('\n'))
+            builtins_asm.write("")
+        
+        builtins = Program(builtins_asm.get_value(), "builtins-elf64")
+        builtins_asm.close()
+        self.write(f"%include \"{'#{LIB_DIRECTORY}builtins-elf64.asm'}\"\n")
 
         # User defined code
         # _start:
