@@ -7,7 +7,7 @@ section .data
 section .text
     global _start
 
-%include "/mnt/c/Users/Zach/Documents/.dev/Github/Panda-Lang/src/lib/builtins-elf64.asm"
+%include "/mnt/c/Users/Zach/Documents/.dev/Github/Panda-Lang/src/tests/output/lib/builtins-elf64.asm"
 
 _start:
     print _cs0

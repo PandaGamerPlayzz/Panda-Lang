@@ -1,6 +1,5 @@
 ; Built-In methods and macros for Panda-Lang
 ; Linux x86_64: elf64
-;; coments defined with two semicolons will not appear in the generated program and can only be seen in this file
 
 ; section .bss 
 ;     digitSpace resb 100
@@ -443,3 +442,4 @@ MLOCK2                      equ 325
 COPY_FILE_RANGE             equ 326
 PREADV2                     equ 327
 PWRITEV2                    equ 328
+

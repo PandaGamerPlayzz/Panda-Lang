@@ -10,7 +10,7 @@ from version import VERSION
 
 ALWAYS_DEFAULT_EXIT_WITH_0 = True
 USE_ABSOLUTE_INCLUDE_PATH = True
-REBUILD_LIB = False
+REBUILD_LIB = True
 
 class ASSEMBLER(Enum):
     NASM = auto()
@@ -33,7 +33,8 @@ class Program:
         # Correct handling for relative paths like './tests/test.pnda/..'
         dir_name = os.path.normpath(dir_name)  # Normalize the path to resolve '..'
 
-        lib_path = os.path.normpath(os.path.join(dir_name, 'lib/'))
+        output_folder_path = os.path.normpath(os.path.join(dir_name, 'output/'))
+        lib_path = os.path.normpath(os.path.join(output_folder_path, 'lib/'))
 
         if USE_ABSOLUTE_INCLUDE_PATH == True:
             self.assembly_source = self.assembly_source.replace("#{LIB_DIRECTORY}", os.path.abspath(lib_path) + "/")
@@ -49,8 +50,8 @@ class Program:
 
         if self.program_name == None:
             # Generate the filenames for assembly and object files
-            asm_filename = os.path.join(dir_name, f"{base_name}.asm") if full_output else tempfile.mktemp(suffix='.asm', dir=dir_name)
-            obj_filename = os.path.join(dir_name, f"{base_name}.o") if full_output else tempfile.mktemp(suffix='.o', dir=dir_name)
+            asm_filename = os.path.join(output_folder_path, f"{base_name}.asm") if full_output else tempfile.mktemp(suffix='.asm', dir=dir_name)
+            obj_filename = os.path.join(output_folder_path, f"{base_name}.o") if full_output else tempfile.mktemp(suffix='.o', dir=dir_name)
 
             try:
                 # Write assembly source to file
@@ -78,6 +79,7 @@ class Program:
                         os.remove(obj_filename)
 
                 if not os.listdir(lib_path): os.rmdir(lib_path)
+                if not os.listdir(output_folder_path): os.rmdir(output_folder_path)
                 
         else:
             # Generate the filenames for assembly and object files
