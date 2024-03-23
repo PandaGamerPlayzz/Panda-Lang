@@ -66,12 +66,10 @@ class Program:
                 subprocess.run(["nasm", "-f", "elf64", "-o", obj_filename, asm_filename], check=True, stderr=subprocess.PIPE)
 
                 self.link(output_path, object_filenames, full_output=full_output)
-
             except subprocess.CalledProcessError as e:
                 print(f"Error during {'assembly' if 'nasm' in e.cmd else 'linking'}:")
                 print(e.stderr.decode())
                 raise
-
             finally:
                 # Cleanup temporary files if not in full_output mode
                 if not full_output:
